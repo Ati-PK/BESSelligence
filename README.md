@@ -1,147 +1,129 @@
-# ds-modeling-pipeline
+# Besselligence
 
-Here you find a Skeleton project for building a simple model in a python script or notebook and log the results on MLFlow.
+**Besselligence** is a capstone project on **day-ahead electricity price forecasting** for the German electricity market and its downstream application to **battery energy storage system (BESS) optimization**.
 
-There are two ways to do it: 
-* In Jupyter Notebooks:
-    We train a simple model in the [jupyter notebook](notebooks/EDA-and-modeling.ipynb), where we select only some features and do minimal cleaning. The hyperparameters of feature engineering and modeling will be logged with MLflow
+The project combines data preparation, leakage-free feature engineering, machine learning forecasting, model evaluation, and battery dispatch optimization. The objective is to build a realistic forecasting pipeline and assess how forecast quality affects battery trading performance.
 
-* With Python scripts:
-    The [main script](modeling/train.py) will go through exactly the same process as the jupyter notebook and also log the hyperparameters with MLflow
+---
 
-Data used is the [coffee quality dataset](https://github.com/jldbc/coffee-quality-database).
+## Project Overview
 
-## Requirements:
+Electricity prices are influenced by demand, renewable generation, fuel prices, weather conditions, and market regime changes. In this project, hourly day-ahead electricity prices are forecasted and then used in a battery arbitrage model.
 
-- pyenv with Python: 3.11.3
+The battery use case is based on a simple principle:
 
-### Setup
+- charge when prices are low
+- discharge when prices are high
 
-Use the requirements file in this repo to create a new environment.
+Because of this downstream application, the project focuses not only on forecast accuracy but also on a realistic and leakage-free workflow.
 
-```BASH
+--- 
+## Data Sources
+
+The modeling dataset combines several groups of variables relevant to electricity price formation.
+
+### Market and forecast data
+- day-ahead electricity price
+- forecasted load
+- forecasted solar generation
+- forecasted wind onshore generation
+- forecasted wind offshore generation
+
+### Weather data
+- temperature
+- wind speed
+
+### Commodity data
+- gas price
+- coal price
+- CO₂ price
+
+---
+
+## Feature Engineering
+
+A central part of the project is the construction of a **strictly leakage-free feature set**.
+
+The feature engineering pipeline starts from a prepared master dataset and creates the final modeling dataset:
+
+```
+../data/df_features.csv
+
+```
+---
+
+## Project Workflow
+
+The project consists of four main stages:
+
+### 1. Data preparation
+Multiple data sources are collected, cleaned, and merged into one hourly master dataset.
+
+### 2. Feature engineering
+A strictly leakage-free feature dataset is created using only information that would be available at prediction time.
+
+### 3. Forecast modeling and interpretation
+A naive benchmark together with Lasso, XGBoost, CatBoost, and LightGBM models is trained and evaluated using chronological train, validation, and test splits. The best-performing model, LightGBM, is further analyzed using SHAP.
+
+### 4. Battery optimization
+The final LightGBM forecast is used in a battery scheduling model and compared with a perfect-foresight benchmark.
+
+---
+
+## Project Structure
+
+```
+
+├── data/                  # raw and processed datasets
+├── notebooks/             # EDA, feature engineering, modeling, battery simulation
+├── Apps/                  # Streamlit app and demo files
+├── images/                # plots and visual outputs
+├── app.py                 # Streamlit app entry point
+├── requirements.txt
+├── requirements_dev.txt
+└── README.md
+```
+
+
+## Requirements
+
+- **pyenv** with **Python 3.11.3**
+
+## Setup
+
+Use the requirements file in this repository to create a new environment.
+
+### macOS / Linux
+
+```bash
 make setup
 
-#or
+# or
 
 pyenv local 3.11.3
 python -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install -r requirements_dev.txt
-```
-
-The `requirements.txt` file contains the libraries needed for deployment.. of model or dashboard .. thus no jupyter or other libs used during development.
-
-The MLFLOW URI should **not be stored on git**, you have two options, to save it locally in the `.mlflow_uri` file:
-
-```BASH
-echo http://127.0.0.1:5000/ > .mlflow_uri
-```
-
-This will create a local file where the uri is stored which will not be added on github (`.mlflow_uri` is in the `.gitignore` file). Alternatively you can export it as an environment variable with
-
-```bash
-export MLFLOW_URI=http://127.0.0.1:5000/
-```
-
-This links to your local mlflow, if you want to use a different one, then change the set uri.
-
-The code in the [config.py](modeling/config.py) will try to read it locally and if the file doesn't exist will look in the env var.. IF that is not set the URI will be empty in your code.
-
-For Windows with Git Bash
+pip install -r requirements.txt
 
 ```
+
+### Windows (Git Bash)
+```
+
 pyenv local 3.11.3
 python -m venv .venv
 source .venv/Scripts/activate
 python -m pip install --upgrade pip
-pip install -r requirements_dev.txt
-```
-## Usage
-
-### Creating an MLFlow experiment
-
-You can do it via the GUI or via [command line](https://www.mlflow.org/docs/latest/tracking.html#managing-experiments-and-runs-with-the-tracking-service-api) if you use the local mlflow:
-
-```bash
-mlflow experiments create --experiment-name 0-template-ds-modeling
+pip install -r requirements.txt
 ```
 
-Check your local mlflow
-
-```bash
-mlflow ui
+### Windows (PowerShell)
 ```
 
-and open the link [http://127.0.0.1:5000](http://127.0.0.1:5000)
-
-This will throw an error if the experiment already exists. **Save the experiment name in the [config file](modeling/config.py).**
-
-In order to train the model and store test data in the data folder and the model in models run:
-
-```bash
-#activate env
-source .venv/bin/activate
-
-python -m modeling.train
+pyenv local 3.11.3
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
-
-In order to test that predict works on a test set you created run:
-
-```bash
-python modeling/predict.py models/linear data/X_test.csv data/y_test.csv
-```
-
-## About MLFLOW -- delete this when using the template
-
-MLFlow is a tool for tracking ML experiments. You can run it locally or remotely. It stores all the information about experiments in a database.
-And you can see the overview via the GUI or access it via APIs. Sending data to mlflow is done via APIs. And with mlflow you can also store models on S3 where you version them and tag them as production for serving them in production.
-![mlflow workflow](images/0_general_tracking_mlflow.png)
-
-### MLFlow GUI
-
-You can group model trainings in experiments. The granularity of what an experiment is up to your usecase. Recommended is to have an experiment per data product, as for all the runs in an experiment you can compare the results.
-![gui](images/1_gui.png)
-
-### Code to send data to MLFlow
-
-In order to send data about your model you need to set the connection information, via the tracking uri and also the experiment name (otherwise the default one is used). One run represents a model, and all the rest is metadata. For example if you want to save train MSE, test MSE and validation MSE you need to name them as 3 different metrics.
-If you are doing CV you can set the tracking as nested.
-![mlflow code](images/2_code.png)
-
-### MLFlow metadata
-
-There is no constraint between runs to have the same metadata tracked. I.e. for one run you can track different tags, different metrics, and different parameters (in cv some parameters might not exist for some runs so this .. makes sense to be flexible).
-
-- tags can be anything you want.. like if you do CV you might want to tag the best model as "best"
-- params are perfect for hypermeters and also for information about the data pipeline you use, if you scaling vs normalization and so on
-- metrics.. should be numeric values as these can get plotted
-
-![mlflow metadata](images/3_metadata.png)
-
-## Development Notes
-
-### Handling Merge Conflicts in Jupyter Notebooks
-
-When working collaboratively, merge conflicts may occur in `.ipynb` files because notebooks are stored as JSON.  
-To simplify resolving these conflicts, this project uses **nbdime** (already included in `requirements_dev.txt`).
-
-#### Enable once
-After setting up your environment, enable nbdime for Git:
-```bash
-nbdime config-git --enable
-```
-
-#### When a merge conflict occurs
-Run the following command to open the merge tool:
-```bash
-nbdime mergetool
-```
-A browser window will open showing both notebook versions side by side.
-Select the correct cells, save, and then complete the merge:
-```bash
-git add <notebook>.ipynb
-git commit -m "Resolve notebook merge conflict"
-```
-That’s it — clean merges for notebooks!
