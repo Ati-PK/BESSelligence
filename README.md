@@ -73,13 +73,14 @@ The final LightGBM forecast is used in a battery scheduling model and compared w
 ## Project Structure
 
 ```
-
 ├── data/                  # raw and processed datasets
+├── Docs/                  # literature review and reference material
 ├── notebooks/             # EDA, feature engineering, modeling, battery simulation
 ├── Apps/                  # Streamlit app and demo files
 ├── images/                # plots and visual outputs
 ├── app.py                 # Streamlit app entry point
 ├── requirements.txt
+├── requirements_dev.txt
 └── README.md
 ```
 
