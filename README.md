@@ -80,7 +80,6 @@ The final LightGBM forecast is used in a battery scheduling model and compared w
 ├── images/                # plots and visual outputs
 ├── app.py                 # Streamlit app entry point
 ├── requirements.txt
-├── requirements_dev.txt
 └── README.md
 ```
 
