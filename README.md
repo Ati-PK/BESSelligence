@@ -49,6 +49,15 @@ This links to your local mlflow, if you want to use a different one, then change
 
 The code in the [config.py](modeling/config.py) will try to read it locally and if the file doesn't exist will look in the env var.. IF that is not set the URI will be empty in your code.
 
+For Windows with Git Bash
+
+```
+pyenv local 3.11.3
+python -m venv .venv
+source .venv/Scripts/activate
+python -m pip install --upgrade pip
+pip install -r requirements_dev.txt
+```
 ## Usage
 
 ### Creating an MLFlow experiment
