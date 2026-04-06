@@ -129,8 +129,8 @@ pip install -r requirements.txt
 ```
 ## Contributors
 
+- Josip Bosnjakovic
 - Cecilia Hornok
 - Christoph Bückle
-- Josip Bosnjakovic
 - Wladimir Lindy
 - Atefeh Pour Karimi
