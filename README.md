@@ -40,18 +40,6 @@ The modeling dataset combines several groups of variables relevant to electricit
 
 ---
 
-## Feature Engineering
-
-A central part of the project is the construction of a **strictly leakage-free feature set**.
-
-The feature engineering pipeline starts from a prepared master dataset and creates the final modeling dataset:
-
-```
-../data/df_features.csv
-
-```
----
-
 ## Project Workflow
 
 The project consists of four main stages:
@@ -132,5 +120,5 @@ pip install -r requirements.txt
 - Josip Bosnjakovic
 - Cecilia Hornok
 - Christoph Bückle
-- Wladimir Lindy
+- Wladimir Linde
 - Atefeh Pour Karimi
